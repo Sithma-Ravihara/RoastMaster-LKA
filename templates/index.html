@@ -7,58 +7,38 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        body {
-            background: radial-gradient(circle at center, #1a1a2e, #16213e, #0f3460);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        .btn-gradient {
-            background: linear-gradient(45deg, #ff0055, #ffdd00);
-            transition: all 0.3s ease;
-        }
-        .btn-gradient:hover {
-            transform: scale(1.05) rotate(-1deg);
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
-        }
+        body { background: radial-gradient(circle, #0f172a, #000000); min-height: 100vh; color: white; font-family: sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem; }
+        .loader { border: 3px solid #333; border-top: 3px solid #ec4899; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="p-6">
-    <div class="glass-card w-full max-w-md p-10 animate__animated animate__fadeInDown">
-        <h1 class="text-5xl font-black text-center mb-2 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">ROAST AI</h1>
-        <p class="text-gray-400 text-center mb-10 text-sm tracking-widest">SITHMA PREMIUM EDITION</p>
+<body class="flex items-center justify-center p-6">
+    <div class="glass w-full max-w-md p-10 animate__animated animate__zoomIn">
+        <h1 class="text-4xl font-black text-center mb-1 bg-gradient-to-r from-pink-500 to-yellow-500 bg-clip-text text-transparent">SITHMA AI</h1>
+        <p class="text-gray-500 text-center text-xs tracking-widest mb-10 uppercase">Savage Roast Edition</p>
 
-        <form id="roastForm" class="space-y-8">
-            <div class="group relative border-2 border-dashed border-gray-600 rounded-2xl p-10 text-center hover:border-pink-500 transition-all cursor-pointer">
+        <form id="roastForm" class="space-y-6">
+            <div class="relative border-2 border-dashed border-gray-700 rounded-2xl p-8 text-center hover:border-pink-500 transition-all">
                 <input type="file" name="photo" id="photo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required>
-                <div id="previewContainer">
-                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📸</div>
-                    <p class="text-gray-400 group-hover:text-white">Drop your selfie here</p>
+                <div id="preview">
+                    <p class="text-4xl mb-2">📸</p>
+                    <p class="text-gray-400 text-sm">Upload your face to get roasted</p>
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="w-full btn-gradient py-5 rounded-2xl font-black text-white text-xl uppercase tracking-tighter">
-                Destroy Me! 🔥
+            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-pink-600 to-pink-400 py-4 rounded-xl font-bold text-white shadow-lg hover:brightness-110 transition-all">
+                START ROASTING 🔥
             </button>
         </form>
 
-        <div id="loading" class="hidden text-center mt-10">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
-            <p class="mt-4 text-pink-400 animate-pulse font-bold">AI is judging your face...</p>
+        <div id="loading" class="hidden flex flex-col items-center mt-10">
+            <div class="loader"></div>
+            <p class="mt-4 text-pink-500 animate-pulse font-medium text-sm">AI is thinking of a savage burn...</p>
         </div>
 
-        <div id="resultBox" class="hidden mt-10 p-6 bg-white/5 rounded-2xl border-l-4 border-pink-500 animate__animated animate__jackInTheBox">
-            <p id="roastResult" class="text-xl text-white italic leading-relaxed"></p>
+        <div id="resultBox" class="hidden mt-10 p-6 bg-pink-500/10 rounded-2xl border border-pink-500/20 animate__animated animate__fadeInUp">
+            <p id="roastResult" class="text-center text-lg italic text-pink-100"></p>
         </div>
     </div>
 
@@ -66,23 +46,23 @@
         const form = document.getElementById('roastForm');
         form.onsubmit = async (e) => {
             e.preventDefault();
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('resultBox').classList.add('hidden');
+            const btn = document.getElementById('submitBtn');
+            const load = document.getElementById('loading');
+            const resBox = document.getElementById('resultBox');
+            
+            btn.disabled = true;
+            load.classList.remove('hidden');
+            resBox.classList.add('hidden');
 
-            const formData = new FormData(form);
-            const response = await fetch('/roast', { method: 'POST', body: formData });
-            const data = await response.json();
-
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('submitBtn').disabled = false;
-
-            if (data.roast) {
-                document.getElementById('resultBox').classList.remove('hidden');
-                document.getElementById('roastResult').innerText = data.roast;
-            } else {
-                alert("AI is sleepy. Try again!");
-            }
+            try {
+                const response = await fetch('/roast', { method: 'POST', body: new FormData(form) });
+                const data = await response.json();
+                if (data.roast) {
+                    document.getElementById('roastResult').innerText = data.roast;
+                    resBox.classList.remove('hidden');
+                } else { alert(data.error || "Try again later!"); }
+            } catch (err) { alert("Server is busy. Use a smaller image!"); }
+            finally { btn.disabled = false; load.classList.add('hidden'); }
         };
     </script>
 </body>
