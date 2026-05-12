@@ -11,6 +11,17 @@
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem; }
         .loader { border: 3px solid #333; border-top: 3px solid #ec4899; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Preview Image Style */
+        #imgPreview {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 3px solid #ec4899;
+            margin: 0 auto 15px auto;
+            display: none; /* පින්තූරයක් තෝරනකම් පේන්නේ නැහැ */
+        }
     </style>
 </head>
 <body class="flex items-center justify-center p-6">
@@ -20,10 +31,13 @@
 
         <form id="roastForm" class="space-y-6">
             <div class="relative border-2 border-dashed border-gray-700 rounded-2xl p-8 text-center hover:border-pink-500 transition-all">
-                <input type="file" name="photo" id="photo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required>
-                <div id="preview">
+                <input type="file" name="photo" id="photo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required onchange="showPreview(event)">
+                
+                <img id="imgPreview" src="" alt="Preview">
+                
+                <div id="uploadText">
                     <p class="text-4xl mb-2">📸</p>
-                    <p class="text-gray-400 text-sm">Upload your face</p>
+                    <p class="text-gray-400 text-sm">Tap to Select Face</p>
                 </div>
             </div>
 
@@ -43,9 +57,20 @@
     </div>
 
     <script>
+        // පින්තූරය තෝරපු ගමන් ඒක පෙන්වන Function එක
+        function showPreview(event) {
+            if(event.target.files.length > 0){
+                var src = URL.createObjectURL(event.target.files[0]);
+                var preview = document.getElementById("imgPreview");
+                var uploadText = document.getElementById("uploadText");
+                preview.src = src;
+                preview.style.display = "block";
+                uploadText.style.display = "none"; // අයිකන් එක අයින් කරනවා
+            }
+        }
+
         const form = document.getElementById('roastForm');
         
-        // පින්තූරේ පොඩි කරන Function එක
         async function compressImage(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -55,7 +80,7 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 400; // AI එකට මේ ඇති
+                        const MAX_WIDTH = 400;
                         const scaleSize = MAX_WIDTH / img.width;
                         canvas.width = MAX_WIDTH;
                         canvas.height = img.height * scaleSize;
@@ -63,7 +88,7 @@
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         canvas.toBlob((blob) => {
                             resolve(new File([blob], file.name, { type: "image/jpeg" }));
-                        }, "image/jpeg", 0.7); // 70% Quality එකට අඩු කරනවා
+                        }, "image/jpeg", 0.7);
                     };
                 };
             });
