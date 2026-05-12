@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,64 +8,57 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background: radial-gradient(circle at center, #1a1a2e, #16213e, #0f3460);
             min-height: 100vh;
-            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        .gradient-text {
-            background: linear-gradient(to right, #ff416c, #ff4b2b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .btn-gradient {
+            background: linear-gradient(45deg, #ff0055, #ffdd00);
+            transition: all 0.3s ease;
         }
-        .loader {
-            border: 4px solid rgba(255,255,255,0.1);
-            border-left-color: #ff416c;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
+        .btn-gradient:hover {
+            transform: scale(1.05) rotate(-1deg);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="p-4">
-    <div class="glass w-full max-w-md p-8 animate__animated animate__fadeInUp">
-        <h1 class="text-4xl font-black text-center mb-2 gradient-text">SITHMA AI</h1>
-        <p class="text-gray-400 text-center mb-8 text-sm">ලංකාවේ සැරම AI Roast එක</p>
+<body class="p-6">
+    <div class="glass-card w-full max-w-md p-10 animate__animated animate__fadeInDown">
+        <h1 class="text-5xl font-black text-center mb-2 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">ROAST AI</h1>
+        <p class="text-gray-400 text-center mb-10 text-sm tracking-widest">SITHMA PREMIUM EDITION</p>
 
-        <form id="roastForm" class="space-y-6">
-            <div class="relative border-2 border-dashed border-gray-500 rounded-xl p-6 text-center hover:border-pink-500 transition-all">
+        <form id="roastForm" class="space-y-8">
+            <div class="group relative border-2 border-dashed border-gray-600 rounded-2xl p-10 text-center hover:border-pink-500 transition-all cursor-pointer">
                 <input type="file" name="photo" id="photo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required>
-                <div id="previewText">
-                    <p class="text-3xl mb-2">📸</p>
-                    <p class="text-sm text-gray-300">පින්තූරයක් තෝරන්න</p>
+                <div id="previewContainer">
+                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📸</div>
+                    <p class="text-gray-400 group-hover:text-white">Drop your selfie here</p>
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-pink-600 to-red-600 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-transform active:scale-95 shadow-lg">
-                ROAST ME! 🔥
+            <button type="submit" id="submitBtn" class="w-full btn-gradient py-5 rounded-2xl font-black text-white text-xl uppercase tracking-tighter">
+                Destroy Me! 🔥
             </button>
         </form>
 
-        <div id="loading" class="hidden flex flex-col items-center mt-8 space-y-4">
-            <div class="loader"></div>
-            <p class="text-pink-400 animate-pulse">AI එක ඔයාගේ රූපේ විචාරය කරනවා...</p>
+        <div id="loading" class="hidden text-center mt-10">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+            <p class="mt-4 text-pink-400 animate-pulse font-bold">AI is judging your face...</p>
         </div>
 
-        <div id="resultBox" class="hidden mt-8 p-6 bg-black/40 rounded-2xl border border-pink-500/30 animate__animated animate__zoomIn">
-            <h3 class="text-pink-500 font-bold mb-2">AI කීව කතාව:</h3>
-            <p id="roastResult" class="text-lg leading-relaxed italic text-gray-200"></p>
-            <button onclick="location.reload()" class="mt-4 text-xs text-gray-500 underline">තව එකක් කරමු</button>
+        <div id="resultBox" class="hidden mt-10 p-6 bg-white/5 rounded-2xl border-l-4 border-pink-500 animate__animated animate__jackInTheBox">
+            <p id="roastResult" class="text-xl text-white italic leading-relaxed"></p>
         </div>
     </div>
 
@@ -88,7 +81,7 @@
                 document.getElementById('resultBox').classList.remove('hidden');
                 document.getElementById('roastResult').innerText = data.roast;
             } else {
-                alert("AI busy. Try again!");
+                alert("AI is sleepy. Try again!");
             }
         };
     </script>
