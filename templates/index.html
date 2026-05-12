@@ -15,26 +15,26 @@
 </head>
 <body class="flex items-center justify-center p-6">
     <div class="glass w-full max-w-md p-10 animate__animated animate__zoomIn">
-        <h1 class="text-4xl font-black text-center mb-1 bg-gradient-to-r from-pink-500 to-yellow-500 bg-clip-text text-transparent">SITHMA AI</h1>
-        <p class="text-gray-500 text-center text-xs tracking-widest mb-10 uppercase">Savage Roast Edition</p>
+        <h1 class="text-4xl font-black text-center mb-1 bg-gradient-to-r from-pink-500 to-yellow-500 bg-clip-text text-transparent uppercase tracking-tighter">SITHMA AI</h1>
+        <p class="text-gray-500 text-center text-[10px] tracking-[0.3em] mb-10 uppercase font-bold">Premium Savage Roast</p>
 
         <form id="roastForm" class="space-y-6">
             <div class="relative border-2 border-dashed border-gray-700 rounded-2xl p-8 text-center hover:border-pink-500 transition-all">
                 <input type="file" name="photo" id="photo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required>
                 <div id="preview">
                     <p class="text-4xl mb-2">📸</p>
-                    <p class="text-gray-400 text-sm">Upload your face to get roasted</p>
+                    <p class="text-gray-400 text-sm">Upload your face</p>
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-pink-600 to-pink-400 py-4 rounded-xl font-bold text-white shadow-lg hover:brightness-110 transition-all">
+            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-pink-600 to-pink-400 py-4 rounded-xl font-bold text-white shadow-lg hover:scale-[1.02] transition-all">
                 START ROASTING 🔥
             </button>
         </form>
 
         <div id="loading" class="hidden flex flex-col items-center mt-10">
             <div class="loader"></div>
-            <p class="mt-4 text-pink-500 animate-pulse font-medium text-sm">AI is thinking of a savage burn...</p>
+            <p class="mt-4 text-pink-500 animate-pulse font-medium text-sm">AI is judging your life choices...</p>
         </div>
 
         <div id="resultBox" class="hidden mt-10 p-6 bg-pink-500/10 rounded-2xl border border-pink-500/20 animate__animated animate__fadeInUp">
@@ -44,6 +44,31 @@
 
     <script>
         const form = document.getElementById('roastForm');
+        
+        // පින්තූරේ පොඩි කරන Function එක
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 400; // AI එකට මේ ඇති
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, { type: "image/jpeg" }));
+                        }, "image/jpeg", 0.7); // 70% Quality එකට අඩු කරනවා
+                    };
+                };
+            });
+        }
+
         form.onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -54,14 +79,20 @@
             load.classList.remove('hidden');
             resBox.classList.add('hidden');
 
+            const originalFile = document.getElementById('photo').files[0];
+            const compressedFile = await compressImage(originalFile);
+
+            const formData = new FormData();
+            formData.append('photo', compressedFile);
+
             try {
-                const response = await fetch('/roast', { method: 'POST', body: new FormData(form) });
+                const response = await fetch('/roast', { method: 'POST', body: formData });
                 const data = await response.json();
                 if (data.roast) {
                     document.getElementById('roastResult').innerText = data.roast;
                     resBox.classList.remove('hidden');
-                } else { alert(data.error || "Try again later!"); }
-            } catch (err) { alert("Server is busy. Use a smaller image!"); }
+                } else { alert("AI says: " + data.error); }
+            } catch (err) { alert("Timeout! Try again with a simple face photo."); }
             finally { btn.disabled = false; load.classList.add('hidden'); }
         };
     </script>
